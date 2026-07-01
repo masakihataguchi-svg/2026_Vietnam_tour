@@ -10,7 +10,7 @@ let wakeLock = null;
 
 // --- 機能0: データ読み込み (スケジュール) ---
 async function loadSchedule() {
-    console.log("★最新版JS読み込み成功: 完全CSV対応版★");
+    console.log("★最新版JS読み込み成功: ベトナム対応版★");
     try {
         const configResp = await fetch("config.json?t=" + new Date().getTime());
         if (!configResp.ok) throw new Error("config.jsonが見つかりません");
@@ -153,7 +153,7 @@ async function loadMemoLinks() {
             if (dateStr !== currentDayStr && dateStr !== "") {
                 currentDayStr = dateStr;
                 const dateHeader = document.createElement('h3');
-                dateHeader.style.cssText = "margin: 25px 0 10px 5px; color: #0055a4; border-bottom: 2px solid #0055a4; display: inline-block; padding-bottom: 3px; font-size: 1.1em;";
+                dateHeader.style.cssText = "margin: 25px 0 10px 5px; color: #1e4620; border-bottom: 2px solid #1e4620; display: inline-block; padding-bottom: 3px; font-size: 1.1em;";
                 dateHeader.innerText = dateStr;
                 container.appendChild(dateHeader);
             }
@@ -222,15 +222,15 @@ function renderScheduleList() {
         else if (item.mode.includes('sight')) { statusIcon = '<i class="fas fa-camera"></i>'; iconColor = "#16a085"; }
         else if (item.mode.includes('stay')) { statusIcon = '<i class="fas fa-map-pin"></i>'; iconColor = "#16a085"; }
         else if (item.mode.includes('prep')) { statusIcon = '<i class="fas fa-clipboard-list"></i>'; iconColor = "#34495e"; }
-        else if (item.mode.includes('departure')) { statusIcon = '<i class="fas fa-flag"></i>'; iconColor = "#0055a4"; }
+        else if (item.mode.includes('departure')) { statusIcon = '<i class="fas fa-flag"></i>'; iconColor = "#1e4620"; }
 
         let linkIcon = "";
-        if (item.webLinks.length > 0) linkIcon = ` <i class="fas fa-external-link-alt" style="color:#0055a4; margin-left:5px; font-size:0.8em;"></i>`;
+        if (item.webLinks.length > 0) linkIcon = ` <i class="fas fa-external-link-alt" style="color:#1e4620; margin-left:5px; font-size:0.8em;"></i>`;
         
         let calendarIcon = "";
         if (item.notifyTime) {
             const gCalLink = generateGoogleCalendarLink(item.title, item.time, item.detail);
-            calendarIcon = ` <a href="${gCalLink}" target="_blank" style="color:#e67e22; margin-left:8px; font-size:0.9em;" onclick="event.stopPropagation();">
+            calendarIcon = ` <a href="${gCalLink}" target="_blank" style="color:#d96b43; margin-left:8px; font-size:0.9em;" onclick="event.stopPropagation();">
                                 <i class="far fa-calendar-plus"></i>
                              </a>`;
         }
@@ -257,8 +257,8 @@ function generateGoogleCalendarLink(title, startTimeStr, detail) {
     };
     const start = formatTime(startDate);
     const end = formatTime(endDate);
-    const text = encodeURIComponent("【北海道旅】" + title);
-    const details = encodeURIComponent(detail + "\n\nfrom SAKUSAKU 2026 App");
+    const text = encodeURIComponent("【ベトナム旅】" + title);
+    const details = encodeURIComponent(detail + "\n\nfrom VIETNAM TOUR App");
     return `https://www.google.com/calendar/render?action=TEMPLATE&text=${text}&dates=${start}/${end}&details=${details}`;
 }
 
@@ -367,11 +367,9 @@ function renderWebLinks(item, container, defaultLabel) {
     }
 }
 
-// ★改良: 画像ごとに説明文を表示
 function renderImages(item, container, contentArea, defaultLabel) {
     if (item.images && item.images.length > 0) {
         container.style.display = "block";
-        // 古いラベル表示（image-desc）は削除または非表示に
         const descElem = document.getElementById('image-desc');
         if(descElem) descElem.style.display = 'none';
 
@@ -386,7 +384,6 @@ function renderImages(item, container, contentArea, defaultLabel) {
             
             contentArea.appendChild(imgTag);
 
-            // ★画像説明文を追加
             if (img.desc) {
                 const caption = document.createElement('p');
                 caption.className = 'image-caption';
@@ -405,6 +402,36 @@ function closeMemoModal() {
     document.getElementById('memo-modal').style.display = 'none';
 }
 
+// --- 通貨計算ツールロジック ---
+function convertCurrency(type) {
+    const rate = 0.006; // 10,000 VND ≒ 60 JPY
+    const vndInput = document.getElementById('vnd-input');
+    const jpyInput = document.getElementById('jpy-input');
+    
+    if (!vndInput || !jpyInput) return;
+    
+    if (type === 'vnd') {
+        const vnd = vndInput.value;
+        jpyInput.value = vnd ? Math.round(vnd * rate) : '';
+    } else {
+        const jpy = jpyInput.value;
+        vndInput.value = jpy ? Math.round(jpy / rate) : '';
+    }
+}
+
+// --- 音声読み上げロジック ---
+function speakVietnamese(text) {
+    if ('speechSynthesis' in window) {
+        // 再生中の音声を一度クリア
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'vi-VN';
+        window.speechSynthesis.speak(utterance);
+    } else {
+        alert('お使いのブラウザは音声読み上げに対応していません。');
+    }
+}
+
 // --- 共通 ---
 function checkAndNotify() {
     if (Notification.permission !== "granted") { console.log("🔔 通知チェック: 権限なし"); return; }
@@ -419,7 +446,7 @@ function checkAndNotify() {
         if (diff >= 0 && diff < 1800000) {
             if (!notifiedList.includes(notifyKey)) {
                 console.log("🚀 通知実行:", item.notifyMsg);
-                new Notification("SAKUSAKU 2026", { body: item.notifyMsg, icon: "https://cdn-icons-png.flaticon.com/512/64/64572.png", tag: notifyKey });
+                new Notification("VIETNAM TOUR 2026", { body: item.notifyMsg, icon: "https://img.icons8.com/color/512/vietnam-emulator.png", tag: notifyKey });
                 notifiedList.push(notifyKey); localStorage.setItem('notifiedList', JSON.stringify(notifiedList));
             }
         }
@@ -452,7 +479,7 @@ async function toggleWakeLock() {
             try {
                 wakeLock = await navigator.wakeLock.request('screen');
                 btn.innerHTML = '<i class="fas fa-lightbulb"></i> 常時表示: ON';
-                btn.style.background = "#e67e22"; btn.style.fontWeight = "bold";
+                btn.style.background = "#d96b43"; btn.style.fontWeight = "bold";
                 wakeLock.addEventListener('release', () => {});
             } catch (err) { alert("常時表示機能のエラー: " + err.message); }
         } else {
@@ -467,10 +494,15 @@ function startGPS() {
     const btn = document.getElementById('gps-btn'); const display = document.getElementById('speed-display'); const status = document.getElementById('gps-status'); const mapContainer = document.getElementById('live-map-container');
     btn.classList.add('active'); btn.innerHTML = '<i class="fas fa-stop"></i> 計測停止 (地図OFF)'; display.style.display = 'block'; status.innerText = "GPS信号を探しています...";
     mapContainer.style.display = 'block';
+    
+    // 初期設定の位置をハノイ（ホアンキエム湖周辺）に設定 [21.0285, 105.8521]
+    const hanoiLat = 21.0285;
+    const hanoiLng = 105.8521;
+    
     if (map === null) {
-        map = L.map('live-map').setView([43.064, 141.346], 13);
+        map = L.map('live-map').setView([hanoiLat, hanoiLng], 14);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
-        marker = L.marker([43.064, 141.346]).addTo(map);
+        marker = L.marker([hanoiLat, hanoiLng]).addTo(map);
     }
     setTimeout(() => { map.invalidateSize(); }, 100);
     watchId = navigator.geolocation.watchPosition((pos) => {
@@ -514,12 +546,21 @@ function setupSwipe() {
 function openModal(src, caption) { const modal = document.getElementById("image-modal"); document.getElementById("modal-img").src = src; document.getElementById("caption").innerText = caption || ""; modal.style.display = "block"; document.getElementById("modal-img").classList.remove("zoomed"); }
 function closeModal() { document.getElementById("image-modal").style.display = "none"; }
 document.getElementById("modal-img").addEventListener('click', function(e) { e.stopPropagation(); this.classList.toggle("zoomed"); });
+
 function switchTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     document.getElementById(tabId).classList.add('active');
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    if(typeof event !== 'undefined' && event.currentTarget) event.currentTarget.classList.add('active');
+    
+    // ナビゲーションボタンのactive切り替え対応
+    const navButtons = document.querySelectorAll('.nav-btn');
+    navButtons.forEach(btn => {
+        if(btn.getAttribute('onclick').includes(tabId)) {
+            btn.classList.add('active');
+        }
+    });
 }
+
 document.addEventListener('DOMContentLoaded', function() {
     loadSchedule();
     loadMemoLinks();
