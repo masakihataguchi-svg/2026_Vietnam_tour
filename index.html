@@ -1,0 +1,466 @@
+html_content = """<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vietnam Family Tour 2026</title>
+    <!-- PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://img.icons8.com/color/512/vietnam-emulator.png">
+    
+    <style>
+        :root {
+            --bg-color: #f7f5f0;
+            --primary-color: #1e4620;
+            --secondary-color: #d96b43;
+            --text-color: #2c3e50;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding-bottom: 70px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary-color), #2d6a31);
+            color: white;
+            padding: 24px 16px;
+            text-align: center;
+            border-bottom-left-radius: 16px;
+            border-bottom-right-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        header p {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        /* Main Container */
+        main {
+            padding: 16px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Cards */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            border: 1px solid var(--border-color);
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Timeline / Schedule */
+        .timeline {
+            position: relative;
+            padding-left: 20px;
+            border-left: 2px solid #cbd5e1;
+            margin-left: 8px;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -27px;
+            top: 4px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--secondary-color);
+            border: 2px solid white;
+        }
+
+        .time {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+
+        .event {
+            font-size: 14px;
+            font-weight: 500;
+            margin-top: 2px;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f1f5f9;
+            color: #334155;
+            padding: 10px 14px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .btn-map {
+            background-color: #e2e8f0;
+            color: #1e293b;
+            margin-top: 10px;
+            gap: 6px;
+        }
+
+        .btn-map:active {
+            background-color: #cbd5e1;
+        }
+
+        /* FX Calculator */
+        .calc-box {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .input-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            padding: 12px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            outline: none;
+        }
+
+        .input-wrapper input:focus {
+            border-color: var(--primary-color);
+        }
+
+        .input-wrapper .unit {
+            position: absolute;
+            right: 12px;
+            font-weight: bold;
+            color: #94a3b8;
+        }
+
+        /* Phrase Card */
+        .phrase-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .phrase-item {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            background-color: #f8fafc;
+        }
+
+        .phrase-ja {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .phrase-vi {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 4px 0;
+        }
+
+        .phrase-read {
+            font-size: 13px;
+            color: var(--secondary-color);
+            font-weight: 500;
+        }
+
+        /* Navigation Bar */
+        nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 500px;
+            height: 60px;
+            background-color: #ffffff;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            background: none;
+            border: none;
+            width: 100%;
+            height: 100%;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .nav-item.active {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .nav-icon {
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Vietnam Family Tour 2026</h1>
+        <p>ハノイ満喫家族案内ガイドブック</p>
+    </header>
+
+    <main>
+        <!-- TAB 1: SCHEDULE -->
+        <div id="schedule" class="tab-content active">
+            <div class="card">
+                <div class="card-title">📅 8月28日 (金) - 到着＆ディナー</div>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="time">夕方</div>
+                        <div class="event">ノイバイ国際空港に到着・お出迎え</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="time">19:30</div>
+                        <div class="event">Pizza 4P's で歓迎ディナー 🍕</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">📅 8月29日 (土) - ハノイ王道観光</div>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="time">09:30</div>
+                        <div class="event">ホーチミン廟＆文廟をのんびり散策</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="time">12:00</div>
+                        <div class="event">本場のフォーまたはブンチャーのランチ 🍜</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="time">15:00</div>
+                        <div class="event">旧市街（36通り）散策とお土産選び</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="time">20:00</div>
+                        <div class="event">ルーフトップバーでハノイの夜景を楽しむ 🥂</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: SPOTS -->
+        <div id="spots" class="tab-content">
+            <div class="card">
+                <div class="card-title">🍕 Pizza 4P's Trang Tien</div>
+                <p style="font-size: 14px; line-height: 1.5;">日本人の口にも大人気の自家製チーズピザレストラン。雰囲気も抜群で家族の記念ディナーに最適！</p>
+                <a href="https://www.google.com/maps/search/?api=1&query=Pizza+4Ps+Trang+Tien+Hanoi" target="_blank" class="btn btn-map">
+                    📍 Googleマップで経路案内
+                </a>
+            </div>
+
+            <div class="card">
+                <div class="card-title">☕ Cafe Giảng (カフェジャン)</div>
+                <p style="font-size: 14px; line-height: 1.5;">ハノイ名物「エッグコーヒー」の発祥店。濃厚でカスタードクリームのような味わいです。</p>
+                <a href="https://www.google.com/maps/search/?api=1&query=Cafe+Giang+Hanoi" target="_blank" class="btn btn-map">
+                    📍 Googleマップで経路案内
+                </a>
+            </div>
+
+            <div class="card">
+                <div class="card-title">⛩️ ハノイ文廟 (学問の神様)</div>
+                <p style="font-size: 14px; line-height: 1.5;">ベトナム最古の大学跡地。緑豊かで美しい伝統建築が残り、のんびり歩きやすい観光名所です。</p>
+                <a href="https://www.google.com/maps/search/?api=1&query=Temple+of+Literature+Hanoi" target="_blank" class="btn btn-map">
+                    📍 Googleマップで経路案内
+                </a>
+            </div>
+        </div>
+
+        <!-- TAB 3: TIPS -->
+        <div id="tips" class="tab-content">
+            <!-- FX Calc -->
+            <div class="card">
+                <div class="card-title">🧮 ドン ⇄ 円 簡単計算ツール</div>
+                <div class="calc-box">
+                    <div class="input-group">
+                        <label>ベトナムドン (VND)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="vnd-input" placeholder="例: 100000" oninput="calcVndToJpy()">
+                            <span class="unit">VND</span>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>日本円 (JPY) ※目安</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="jpy-input" placeholder="例: 600" oninput="calcJpyToVnd()">
+                            <span class="unit">円</span>
+                        </div>
+                    </div>
+                    <p style="font-size: 11px; color:#94a3b8; text-align:right;">※10,000 VND ≒ 約60円として計算</p>
+                </div>
+            </div>
+
+            <!-- Language Card -->
+            <div class="card">
+                <div class="card-title">💬 店員さんに見せるベトナム語</div>
+                <div class="phrase-grid">
+                    <div class="phrase-item">
+                        <div class="phrase-ja">ありがとう</div>
+                        <div class="phrase-vi">Cảm ơn</div>
+                        <div class="phrase-read">カムオン</div>
+                    </div>
+                    <div class="phrase-item">
+                        <div class="phrase-ja">パクチーを入れないでください</div>
+                        <div class="phrase-vi">Không cho rau mùi</div>
+                        <div class="phrase-read">コン チョー ザウムーイ</div>
+                    </div>
+                    <div class="phrase-item">
+                        <div class="phrase-ja">お会計をお願いします</div>
+                        <div class="phrase-vi">Tính tiền</div>
+                        <div class="phrase-read">ティンティエン</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav>
+        <button class="nav-item active" onclick="switchTab('schedule', this)">
+            <span class="nav-icon">📅</span>
+            <span>予定</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('spots', this)">
+            <span class="nav-icon">📍</span>
+            <span>スポット</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('tips', this)">
+            <span class="nav-icon">💡</span>
+            <span>知恵袋</span>
+        </button>
+    </nav>
+
+    <script>
+        // Tab Navigation
+        function switchTab(tabId, el) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            document.getElementById(tabId).classList.add('active');
+            el.classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        // FX Rate (approximate for easy calculation)
+        // 10,000 VND = 6.0 JPY standard rule of thumb
+        const rate = 0.006; 
+
+        function calcVndToJpy() {
+            const vnd = document.getElementById('vnd-input').value;
+            const jpyInput = document.getElementById('jpy-input');
+            if(vnd) {
+                jpyInput.value = Math.round(vnd * rate);
+            } else {
+                jpyInput.value = '';
+            }
+        }
+
+        function calcJpyToVnd() {
+            const jpy = document.getElementById('jpy-input').value;
+            const vndInput = document.getElementById('vnd-input');
+            if(jpy) {
+                vndInput.value = Math.round(jpy / rate);
+            } else {
+                vndInput.value = '';
+            }
+        }
+    </script>
+</body>
+</html>
+"""
+
+with open("index.html", "w", encoding="utf-8") as f:
+    f.write(html_content)
+print("File index.html generated successfully.")
