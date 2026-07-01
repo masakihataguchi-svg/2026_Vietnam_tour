@@ -130,14 +130,15 @@ function parseCSV(text) {
 
 // --- 機能0-2: データ読み込み (観光メモ) ---
 async function loadMemoLinks() {
-    const memoSheetUrl = "https://docs.google.com/spreadsheets/d/1wPBjsbSexgUp9sCJ-tShQ3_ewq_WY-Tr2LSB59OJJBI/export?format=csv";
+    // ベトナム旅行用のメモシートCSVエクスポートURLに更新[cite: 1]
+    const memoSheetUrl = "https://docs.google.com/spreadsheets/d/1_AEKO4sGT5O-hGM8QrtPeytAcQabQb3dQ13oCbIiwbM/export?format=csv";
     
     try {
         const resp = await fetch(memoSheetUrl + "&t=" + new Date().getTime());
         if(!resp.ok) throw new Error("Memo Sheet Load Error");
 
         const text = await resp.text();
-        const rows = parseCSV(text); // ここも新パーサーを使用
+        const rows = parseCSV(text); 
         const container = document.getElementById('memo-list-container');
         container.innerHTML = "";
 
@@ -404,7 +405,7 @@ function closeMemoModal() {
 
 // --- 通貨計算ツールロジック ---
 function convertCurrency(type) {
-    const rate = 0.006; // 10,000 VND ≒ 60 JPY
+    const rate = 0.006; 
     const vndInput = document.getElementById('vnd-input');
     const jpyInput = document.getElementById('jpy-input');
     
@@ -422,7 +423,6 @@ function convertCurrency(type) {
 // --- 音声読み上げロジック ---
 function speakVietnamese(text) {
     if ('speechSynthesis' in window) {
-        // 再生中の音声を一度クリア
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'vi-VN';
@@ -495,7 +495,6 @@ function startGPS() {
     btn.classList.add('active'); btn.innerHTML = '<i class="fas fa-stop"></i> 計測停止 (地図OFF)'; display.style.display = 'block'; status.innerText = "GPS信号を探しています...";
     mapContainer.style.display = 'block';
     
-    // 初期設定の位置をハノイ（ホアンキエム湖周辺）に設定 [21.0285, 105.8521]
     const hanoiLat = 21.0285;
     const hanoiLng = 105.8521;
     
@@ -552,7 +551,6 @@ function switchTab(tabId) {
     document.getElementById(tabId).classList.add('active');
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     
-    // ナビゲーションボタンのactive切り替え対応
     const navButtons = document.querySelectorAll('.nav-btn');
     navButtons.forEach(btn => {
         if(btn.getAttribute('onclick').includes(tabId)) {
