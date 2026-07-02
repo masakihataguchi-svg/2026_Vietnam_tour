@@ -23,15 +23,12 @@ async function loadSchedule() {
         
         const text = await csvResp.text();
         
-        // ★改良: 高機能CSVパーサーを使用 (セル内改行に対応)
         const rows = parseCSV(text);
         
         scheduleData = rows.map(columns => {
-            // 空行チェック
             if (columns.length < 2) return null;
 
             let tIdx = 0;
-            // 2026が含まれる列を探す (Time列の特定)
             if (columns[2] && columns[2].indexOf('2026') > -1) {
                 tIdx = 2; 
             } else {
@@ -46,13 +43,9 @@ async function loadSchedule() {
             const title = columns[tIdx + 1] ? columns[tIdx + 1].trim() : "";
             const detail = columns[tIdx + 2] ? columns[tIdx + 2].trim() : "";
             
-            // ★改良: パイプ(|) または 改行(\n) の両方で区切れるように正規表現を使用
             const parseMulti = (descRaw, urlRaw) => {
                 if (!urlRaw) return [];
-                
-                // 区切り文字: | または 改行
                 const regex = /\||\n/;
-                
                 const descs = descRaw ? descRaw.split(regex).map(s => s.trim()) : [];
                 const urls = urlRaw ? urlRaw.split(regex).map(s => s.trim()) : [];
                 const results = [];
@@ -90,7 +83,6 @@ async function loadSchedule() {
     }
 }
 
-// ★追加: 本格的なCSVパーサー (セル内改行があっても壊れない)
 function parseCSV(text) {
     const rows = [];
     let currentRow = [];
@@ -103,16 +95,16 @@ function parseCSV(text) {
 
         if (char === '"') {
             if (insideQuote && nextChar === '"') {
-                currentCell += '"'; // エスケープされた引用符
+                currentCell += '"'; 
                 i++;
             } else {
-                insideQuote = !insideQuote; // 引用符の開始/終了
+                insideQuote = !insideQuote; 
             }
         } else if (char === ',' && !insideQuote) {
             currentRow.push(currentCell);
             currentCell = '';
         } else if ((char === '\r' || char === '\n') && !insideQuote) {
-            if (char === '\r' && nextChar === '\n') i++; // CRLF対応
+            if (char === '\r' && nextChar === '\n') i++; 
             currentRow.push(currentCell);
             rows.push(currentRow);
             currentRow = [];
@@ -128,9 +120,8 @@ function parseCSV(text) {
     return rows;
 }
 
-// --- 機能0-2: データ読み込み (観光メモ) ---
+// --- 機能0-2: データ読み込み (観光メモ・インタラクティブ版) ---
 async function loadMemoLinks() {
-    // ベトナム旅行用のメモシートCSVエクスポートURLに更新[cite: 1]
     const memoSheetUrl = "https://docs.google.com/spreadsheets/d/1_AEKO4sGT5O-hGM8QrtPeytAcQabQb3dQ13oCbIiwbM/export?format=csv";
     
     try {
@@ -149,12 +140,23 @@ async function loadMemoLinks() {
 
             const dateStr = cols[0].trim();
             const content = cols[2].trim();
-            const url = cols[3] ? cols[3].trim() : "";
+            let rawUrl = cols[3] ? cols[3].trim() : "";
 
+            // ★高機能パース：Googleスプレッドシートの青文字リンク関数状態(=HYPERLINK)でも生URLでも抽出する
+            let extractedUrl = "";
+            if (rawUrl.startsWith('http')) {
+                extractedUrl = rawUrl;
+            } else {
+                const match = rawUrl.match(/https?:\/\/[^\s"'\)]+/);
+                if (match) extractedUrl = match[0];
+            }
+
+            // カテゴリ（見出し）の作成
             if (dateStr !== currentDayStr && dateStr !== "") {
                 currentDayStr = dateStr;
                 const dateHeader = document.createElement('h3');
-                dateHeader.style.cssText = "margin: 25px 0 10px 5px; color: #1e4620; border-bottom: 2px solid #1e4620; display: inline-block; padding-bottom: 3px; font-size: 1.1em;";
+                // アジアン・ダークグリーンの下線スタイルを直接適用
+                dateHeader.style.cssText = "margin: 25px 0 12px 5px; color: #1e4620; border-bottom: 2px solid #1e4620; display: inline-block; padding-bottom: 4px; font-size: 1.15em; font-weight: bold;";
                 dateHeader.innerText = dateStr;
                 container.appendChild(dateHeader);
             }
@@ -163,14 +165,26 @@ async function loadMemoLinks() {
             div.className = "info-block";
             div.style.background = "white";
             div.style.color = "#333";
-            div.style.border = "1px solid #ddd";
+            div.style.border = "1px solid #e2e8f0";
+            div.style.borderRadius = "10px";
+            div.style.padding = "15px";
+            div.style.marginBottom = "12px";
+            div.style.boxShadow = "0 2px 4px rgba(0,0,0,0.02)";
             
-            let html = `<h4 style="margin:0 0 5px 0; font-size:1.0em; line-height:1.4;">${content}</h4>`;
+            let html = `<h4 style="margin:0 0 8px 0; font-size:1.05em; line-height:1.4; color:#2c3e50;">${content}</h4>`;
             
-            if (url.startsWith('http')) {
-                html += `<a href="${url}" target="_blank" class="event-link-btn" style="margin-top:8px; font-size:0.9em; padding:8px;">
-                            <i class="fas fa-external-link-alt"></i> 詳しく見る
-                         </a>`;
+            // URLが存在する場合のインタラクティブボタン自動生成
+            if (extractedUrl) {
+                // Googleマップのリンクか、一般の情報サイトリンクかによってアイコンとテキストを最適化
+                if (extractedUrl.includes('google.com/maps') || extractedUrl.includes('maps.google')) {
+                    html += `<a href="${extractedUrl}" target="_blank" class="event-link-btn" style="margin-top:10px; font-size:0.95em; padding:10px; background-color:#d96b43; color:white; border-radius:6px; text-align:center;">
+                                📍 Googleマップで場所を確認
+                             </a>`;
+                } else {
+                    html += `<a href="${extractedUrl}" target="_blank" class="event-link-btn" style="margin-top:10px; font-size:0.95em; padding:10px; background-color:#1e4620; color:white; border-radius:6px; text-align:center;">
+                                🔗 おすすめ情報サイトを開く
+                             </a>`;
+                }
             }
             div.innerHTML = html;
             container.appendChild(div);
