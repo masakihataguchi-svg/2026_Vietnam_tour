@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VIETNAM TOUR 2026</title>
     
+    <!-- iOSでのアドレスバー非表示設定＆タイトルの指定 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ベトナム旅行">
+    
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon.png">
     
@@ -86,7 +91,6 @@
         <div id="documents" class="tab-content">
             <h2><i class="fas fa-folder-open"></i> Eチケット・書類</h2>
             <div class="info-block" style="background:white; color:#333; border:1px solid #ddd; padding:0; overflow:hidden;">
-                <!-- 新しいベトナム用のドキュメントフォルダIDに更新完了 -->
                 <iframe src="https://drive.google.com/embeddedfolderview?id=1Skk6b-oxKalsSscA-TeSlYpx4agGkDWx#list" style="width:100%; height:500px; border:none;"></iframe>
             </div>
             <p style="text-align:center; margin-top:20px;">
@@ -225,6 +229,15 @@
 
     <script src="script.js"></script>
     <script>
+        // サービスワーカー(sw.js)の登録スクリプトを追加
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('Service Worker 登録完了!', reg))
+                    .catch(err => console.error('Service Worker 登録失敗...', err));
+            });
+        }
+
         function convertCurrency(type) {
             const rate = 0.006; 
             const vndInput = document.getElementById('vnd-input');
