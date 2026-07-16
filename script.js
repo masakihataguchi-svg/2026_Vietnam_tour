@@ -8,9 +8,12 @@ let marker = null;
 let notifiedList = JSON.parse(localStorage.getItem('notifiedList')) || [];
 let wakeLock = null;
 
+// バナーヒルズ インタラクティブマップオブジェクト用変数
+let banaMap = null;
+
 // --- 機能0: データ読み込み (スケジュール) ---
 async function loadSchedule() {
-    console.log("★最新版JS読み込み成功: ベトナム対応版★");
+    console.log("★最新版JS読み込み成功: ベトナム対応・バナーヒルズマップ統合版★");
     try {
         const configResp = await fetch("config.json?t=" + new Date().getTime());
         if (!configResp.ok) throw new Error("config.jsonが見つかりません");
@@ -142,7 +145,6 @@ async function loadMemoLinks() {
             const content = cols[2].trim();
             let rawUrl = cols[3] ? cols[3].trim() : "";
 
-            // ★高機能パース：Googleスプレッドシートの青文字リンク関数状態(=HYPERLINK)でも生URLでも抽出する
             let extractedUrl = "";
             if (rawUrl.startsWith('http')) {
                 extractedUrl = rawUrl;
@@ -151,11 +153,9 @@ async function loadMemoLinks() {
                 if (match) extractedUrl = match[0];
             }
 
-            // カテゴリ（見出し）の作成
             if (dateStr !== currentDayStr && dateStr !== "") {
                 currentDayStr = dateStr;
                 const dateHeader = document.createElement('h3');
-                // アジアン・ダークグリーンの下線スタイルを直接適用
                 dateHeader.style.cssText = "margin: 25px 0 12px 5px; color: #1e4620; border-bottom: 2px solid #1e4620; display: inline-block; padding-bottom: 4px; font-size: 1.15em; font-weight: bold;";
                 dateHeader.innerText = dateStr;
                 container.appendChild(dateHeader);
@@ -173,9 +173,7 @@ async function loadMemoLinks() {
             
             let html = `<h4 style="margin:0 0 8px 0; font-size:1.05em; line-height:1.4; color:#2c3e50;">${content}</h4>`;
             
-            // URLが存在する場合のインタラクティブボタン自動生成
             if (extractedUrl) {
-                // Googleマップのリンクか、一般の情報サイトリンクかによってアイコンとテキストを最適化
                 if (extractedUrl.includes('google.com/maps') || extractedUrl.includes('maps.google')) {
                     html += `<a href="${extractedUrl}" target="_blank" class="event-link-btn" style="margin-top:10px; font-size:0.95em; padding:10px; background-color:#d96b43; color:white; border-radius:6px; text-align:center;">
                                 📍 Googleマップで場所を確認
@@ -444,6 +442,103 @@ function speakVietnamese(text) {
     } else {
         alert('お使いのブラウザは音声読み上げに対応していません。');
     }
+}
+
+// --- バナーヒルズ インタラクティブマップ機能 ---
+function openBanaMap() {
+    // 園内マップモーダルを起動
+    document.getElementById('bana-map-modal').style.display = 'block';
+    
+    if (banaMap === null) {
+        // LeafletをSimple CRSモードで初期化 (ピクセル座標系)
+        banaMap = L.map('bana-leaflet-map', {
+            crs: L.CRS.Simple,
+            minZoom: -1,
+            maxZoom: 2,
+            zoomSnap: 0.5,
+            bounceAtZoomLimits: false,
+            attributionControl: false
+        });
+
+        // 仮想境界線の設定 [Y座標, X座標] (元のアスペクト比に適合)
+        const bounds = [[0, 0], [1000, 1500]];
+        
+        // アップロード済みのマップ画像を背景に貼り付け
+        const imageUrl = 'Flyer_SW_BaNa_Eng_6.2025-02_iq1ato.jpg';
+        L.imageOverlay(imageUrl, bounds).addTo(banaMap);
+        banaMap.fitBounds(bounds);
+
+        // 主な見どころ・ランドマークの位置情報を設定
+        const landmarks = [
+            {
+                coords: [420, 430], // B2エリア
+                title: "⑧ Cầu Vàng (ゴールデンブリッジ)",
+                desc: "大人気の「神の手」ブリッジ。早朝か夕方の霧のタイミングを狙うと非常に神秘的です。"
+            },
+            {
+                coords: [280, 700], // スライダー周辺
+                title: "③ Máng trượt (アルパインコースター)",
+                desc: "自分でブレーキを操作して滑り降りる大人気マウンテンボブスレー。待ち時間が長くなりやすいため最優先推奨！"
+            },
+            {
+                coords: [780, 240], // B1：ルナキャッスル
+                title: "① Lâu đài Mặt Trăng (ルナ・キャッスル)",
+                desc: "Moon Kingdomの美しいシンボル城。大迫力の4D/5D体感型アトラクションシアターがあります。"
+            },
+            {
+                coords: [750, 850], // A：フランス村・ファンタジーパーク
+                title: "② Fantasy Park (屋内テーマパーク)",
+                desc: "フランス村の地下に広がる3階建ての超巨大屋内テーマパーク。ほぼすべての乗り物やフリープレイ筐体が無料！"
+            }
+        ];
+
+        // ランドマークをピンとして配置
+        landmarks.forEach(point => {
+            const customIcon = L.divIcon({
+                className: 'bana-custom-marker',
+                html: `<div style="
+                    background: #d96b43; 
+                    color: white; 
+                    border-radius: 50%; 
+                    width: 26px; 
+                    height: 26px; 
+                    display: flex; 
+                    align-items: center; 
+                    justify-content: center; 
+                    font-weight: bold; 
+                    font-size: 14px;
+                    border: 2px solid white; 
+                    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+                ">!</div>`,
+                iconSize: [26, 26],
+                iconAnchor: [13, 13]
+            });
+
+            L.marker(point.coords, { icon: customIcon })
+                .addTo(banaMap)
+                .bindPopup(`
+                    <div style="color:#2c3e50; font-family:sans-serif; min-width:180px;">
+                        <h4 style="margin:0 0 6px 0; color:#1e4620; font-size:14px; border-bottom:1px solid #eee; padding-bottom:4px;">${point.title}</h4>
+                        <p style="margin:0; font-size:12px; line-height:1.5;">${point.desc}</p>
+                    </div>
+                `);
+        });
+
+        // 開発・追加調査用の座標ファインダー
+        banaMap.on('click', function(e) {
+            console.log("Clicked Coordinates [Y, X]:", [Math.round(e.latlng.lat), Math.round(e.latlng.lng)]);
+        });
+
+    } else {
+        // 表示ズレ防止のコンテナリサイズ
+        setTimeout(() => {
+            banaMap.invalidateSize();
+        }, 150);
+    }
+}
+
+function closeBanaMap() {
+    document.getElementById('bana-map-modal').style.display = 'none';
 }
 
 // --- 共通 ---
