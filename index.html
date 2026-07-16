@@ -5,11 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VIETNAM TOUR 2026</title>
     
-    <!-- iOSでのアドレスバー非表示設定＆タイトルの指定 -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="ベトナム旅行">
-    
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon.png">
     
@@ -27,7 +22,6 @@
 
     <main id="content-area">
 
-        <!-- HOME TAB -->
         <div id="home" class="tab-content active">
             <div id="time-keeper" class="time-keeper-box" style="position: relative;">
                 <div class="nav-arrow left-arrow" onclick="changeCard(-1)"><i class="fas fa-chevron-left"></i></div>
@@ -50,7 +44,6 @@
                 </div> 
                 <div class="nav-arrow right-arrow" onclick="changeCard(1)"><i class="fas fa-chevron-right"></i></div>
                 
-                <!-- SPEEDOMETER & MAP SECTION -->
                 <div id="speedometer-section">
                     <button id="gps-btn" onclick="toggleGPS()"><i class="fas fa-tachometer-alt"></i> 速度計測＆マップ表示</button>
                     <div id="speed-display" style="display:none;">
@@ -68,13 +61,11 @@
             </div>
         </div>
         
-        <!-- SCHEDULE TAB -->
         <div id="schedule" class="tab-content">
             <h2><i class="fas fa-list-ul"></i> 全日程リスト</h2>
             <div class="timeline"></div>
         </div>
 
-        <!-- ALBUM TAB -->
         <div id="album" class="tab-content">
             <h2><i class="fas fa-images"></i> 共有アルバム</h2>
             <div class="info-block" style="background:white; color:#333; border:1px solid #ddd; text-align:center; padding:30px 20px;">
@@ -87,7 +78,6 @@
             </div>
         </div>
 
-        <!-- DOCUMENTS TAB -->
         <div id="documents" class="tab-content">
             <h2><i class="fas fa-folder-open"></i> Eチケット・書類</h2>
             <div class="info-block" style="background:white; color:#333; border:1px solid #ddd; padding:0; overflow:hidden;">
@@ -100,19 +90,27 @@
             </p>
         </div>
 
-        <!-- MEMO & LINKS TAB -->
         <div id="memo-links" class="tab-content">
             <h2><i class="fas fa-info-circle"></i> 観光・お土産メモ</h2>
+
+            <div class="info-block" style="background:white; color:#333; border:1px solid #e2e8f0; border-radius:10px; padding:15px; margin-bottom:15px; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
+                <h3 style="margin:0 0 5px 0; color:#1e4620; font-size:1.1em; font-weight:bold;">🏰 バナーヒルズ（Ba Na Hills）</h3>
+                <p style="font-size:0.9em; color:#64748b; margin-bottom:12px; line-height:1.4;">
+                    神の手（ゴールデンブリッジ）やアトラクションが点在する高原パーク。ピンズーム対応のインタラクティブマップで行き先をチェック！
+                </p>
+                <button onclick="openBanaMap()" class="event-link-btn" style="background-color:#d96b43; color:white; border-radius:6px; text-align:center; padding:12px; font-weight:bold; width:100%; border:none; cursor:pointer; display:block;">
+                    <i class="fas fa-map-marked-alt"></i> 🗺️ 園内マップを起動
+                </button>
+            </div>
+
             <div id="memo-list-container">
                 <p style="text-align:center; color:#999;">読み込み中...</p>
             </div>
         </div>
 
-        <!-- TIPS TAB -->
         <div id="tips" class="tab-content">
             <h2><i class="fas fa-lightbulb"></i> ベトナム旅の知恵袋</h2>
             
-            <!-- FX Calc -->
             <div class="info-block" style="background:white; color:#333; border:1px solid #ddd;">
                 <h3><i class="fas fa-calculator"></i> ドン ⇄ 円 簡易計算</h3>
                 <div class="calc-box">
@@ -130,7 +128,6 @@
                 <p style="font-size:0.75em; color:#94a3b8; text-align:right; margin-top:6px;">※現在の目安レート（10,000 VND ≒ 約60円）で計算</p>
             </div>
 
-            <!-- Phrases -->
             <div class="info-block" style="background:white; color:#333; border:1px solid #ddd; margin-top:15px;">
                 <h3><i class="fas fa-comments"></i> 指さしベトナム語会話</h3>
                 <p style="font-size:0.8em; color:#64748b; margin-bottom:10px;"><i class="fas fa-volume-up"></i> タップするとスマホが発音します</p>
@@ -158,7 +155,6 @@
             </div>
         </div>
 
-        <!-- SETTINGS TAB -->
         <div id="settings" class="tab-content">
             <h2><i class="fas fa-cog"></i> 設定</h2>
             <div class="info-block" style="background:white; color:#333; border:1px solid #ddd;">
@@ -202,7 +198,11 @@
         </div>
     </div>
 
-    <!-- BOTTOM NAVIGATION -->
+    <div id="bana-map-modal" class="modal" style="display:none; background-color: rgba(0,0,0,0.95); padding: 0;">
+        <span class="close-modal" onclick="closeBanaMap()" style="top: 15px; right: 25px; font-size: 40px; z-index: 3000; color: #f1f1f1; font-weight: bold; cursor: pointer; position: absolute;">&times;</span>
+        <div id="bana-leaflet-map" style="width: 100%; height: 100%; background-color: #1a331e;"></div>
+    </div>
+
     <nav class="bottom-nav">
         <button onclick="switchTab('home')" class="nav-btn active">
             <i class="fas fa-home"></i><br>ホーム
@@ -229,15 +229,6 @@
 
     <script src="script.js"></script>
     <script>
-        // サービスワーカー(sw.js)の登録スクリプトを追加
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('Service Worker 登録完了!', reg))
-                    .catch(err => console.error('Service Worker 登録失敗...', err));
-            });
-        }
-
         function convertCurrency(type) {
             const rate = 0.006; 
             const vndInput = document.getElementById('vnd-input');
