@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Camera, FolderOpen, Video } from 'lucide-react';
+import { Camera, FolderOpen } from 'lucide-react';
 
 export default function CameraTab({ currentDate, onPhotoUpload, uploading, uploadProgress }) {
   return (
