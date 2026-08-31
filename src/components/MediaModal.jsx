@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trash2, ChevronLeft, ChevronRight, ExternalLink, ZoomIn, ZoomOut } from 'lucide-react';
 
@@ -11,10 +11,23 @@ export default function MediaModal({
   onDeletePhoto
 }) {
   const [isZoomed, setIsZoomed] = useState(false);
+  const videoRef = useRef(null);
 
   if (!mediaModalOpen) return null;
 
   const currentMedia = activeMediaList[currentSlideIdx];
+
+  // Google DriveのファイルID抽出
+  const getDriveId = (urlOrId) => {
+    if (!urlOrId) return '';
+    const match = String(urlOrId).match(/\/d\/([^\/]+)/) || String(urlOrId).match(/id=([^&]+)/);
+    return match && match[1] ? match[1] : urlOrId;
+  };
+
+  const fileId = getDriveId(currentMedia?.rawUrl || currentMedia?.url || currentMedia?.id);
+  
+  // iPhoneでも直接ストリーミング再生可能なGoogle Drive直リンクURL
+  const videoStreamUrl = fileId ? `https://lh3.googleusercontent.com/d/${fileId}` : currentMedia?.rawUrl;
 
   const handleNext = () => {
     setIsZoomed(false);
@@ -98,16 +111,21 @@ export default function MediaModal({
               </>
             )}
 
-            {/* ① 動画プレイヤー */}
+            {/* ① 動画プレイヤー（iOS Safari対応：HTML5 <video> + playsInline） */}
             {currentMedia?.isVideo ? (
-              <div className="w-full h-full flex items-center justify-center p-1">
-                <iframe
-                  src={currentMedia.previewUrl}
-                  className="w-full h-full border-0 rounded-xl"
-                  title="Video Player"
-                  allow="autoplay; encrypted-media"
-                  allowFullScreen
-                />
+              <div className="w-full h-full flex flex-col items-center justify-center p-2">
+                <video
+                  ref={videoRef}
+                  key={videoStreamUrl}
+                  controls
+                  playsInline
+                  webkit-playsinline="true"
+                  preload="metadata"
+                  className="max-w-full max-h-[70vh] rounded-2xl object-contain shadow-lg"
+                  src={videoStreamUrl}
+                >
+                  お使いのブラウザは動画再生に対応していません。
+                </video>
               </div>
             ) : currentMedia?.isImage ? (
               /* ② 画像表示（タップで拡大） */
